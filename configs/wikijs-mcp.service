@@ -1,0 +1,15 @@
+[Unit]
+Description=WikiJS MCP Server (Python, streamable-http)
+After=network.target
+
+[Service]
+EnvironmentFile=/etc/wikijs-mcp.env
+Environment=MCP_HTTP_HOST=0.0.0.0
+Environment=MCP_HTTP_PORT=8099
+ExecStart=/opt/wikijs-mcp-http/venv/bin/python3 /opt/wikijs-mcp-http/run_http.py
+Restart=on-failure
+RestartSec=3
+User=root
+
+[Install]
+WantedBy=multi-user.target
