@@ -201,6 +201,51 @@ curl -i -X POST https://<발급받은 URL>/mcp \
 
 ---
 
+## 기존 Docker 호스트(NPM 등)에 설치했던 것을 제거하기
+
+별도 LXC로 이전한 뒤, 기존 Docker 호스트에 남아있는 wikijs-mcp 관련 요소를 정리하는 순서입니다.
+
+```bash
+# 1. wikijs-mcp 서비스 중지 및 비활성화
+sudo systemctl stop wikijs-mcp
+sudo systemctl disable wikijs-mcp
+
+# 2. systemd 서비스 파일 제거
+sudo rm -f /etc/systemd/system/wikijs-mcp.service
+sudo systemctl daemon-reload
+sudo systemctl reset-failed
+
+# 3. nginx GET 필터 제거
+sudo rm -f /etc/nginx/sites-enabled/wikijs-mcp-filter
+sudo rm -f /etc/nginx/sites-available/wikijs-mcp-filter
+sudo nginx -t
+sudo systemctl restart nginx
+
+# 4. Tailscale Funnel 끄기
+sudo tailscale funnel --https=443 off
+tailscale funnel status   # 꺼졌는지 확인
+
+# 5. 설치 파일 제거
+sudo rm -rf /opt/wikijs-mcp-http
+sudo rm -f /etc/wikijs-mcp.env
+
+# 6. (선택) 이 서버에서 Tailscale 자체를 더 이상 안 쓸 경우
+sudo systemctl stop tailscaled
+sudo systemctl disable tailscaled
+sudo apt remove --purge -y tailscale
+sudo rm -f /etc/default/tailscaled
+```
+
+> 6번은 **이 Docker 호스트에서 Tailscale을 더 이상 쓸 일이 없을 때만** 진행하세요. 다른 용도로 계속 쓴다면 생략하고, Tailscale 관리자 콘솔(https://login.tailscale.com/admin/machines)에서 해당 기기만 로그아웃/삭제해두면 됩니다.
+
+정리 후 확인:
+```bash
+sudo ss -tlnp | grep -E '8099|8100'   # 아무것도 안 나와야 정상
+docker-compose ps                      # NPM은 그대로 정상 동작 중이어야 함
+```
+
+---
+
 ## 트러블슈팅
 
 | 증상 | 원인 | 해결 |
