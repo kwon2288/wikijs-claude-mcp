@@ -32,7 +32,7 @@ claude.ai
 
 ```bash
 sudo apt update
-sudo apt install -y python3.12-venv git
+sudo apt install -y python3-venv git
 
 sudo mkdir -p /opt/wikijs-mcp-http
 sudo git clone https://github.com/kwon2288/wikijs-claude-mcp.git /opt/wikijs-mcp-http
